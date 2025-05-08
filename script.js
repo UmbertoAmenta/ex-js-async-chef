@@ -35,6 +35,55 @@ async function getChefBirthday(id) {
   }
 }
 
-getChefBirthday(1)
-  .then((birthDate) => console.log("Data di nascita dello chef:", birthDate))
-  .catch((error) => console.error("Errore:", error.message));
+// getChefBirthday(1)
+//   .then((birthDate) => console.log("Data di nascita dello chef:", birthDate))
+//   .catch((error) => console.error("Errore:", error.message));
+// console.log("Programma eseguito"); // così non è funzionale (non viene eseguito al momento desiderato), meglio la IIFE
+
+// (async () => {
+//   try {
+//     const birthDate = await getChefBirthday(1);
+//     console.log("Data di nascita dello chef:", birthDate);
+//   } catch {
+//     (error) => console.error("Errore:", error.message);
+//   }
+//   console.log("Programma eseguito");
+// })();
+
+//   Soluzione ufficiale
+async function getChefBirthDate(id) {
+  let post;
+  try {
+    const getRecipe = await fetch(`https://dummyjson.com/recipes/${id}`);
+    post = await getRecipe.json();
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Ricetta id ${id} non trovata`); // Bonus 1
+  }
+  if (post.message) {
+    throw new Error(post.message);
+  }
+  let user;
+  try {
+    const getchef = await fetch(`https://dummyjson.com/users/${post.userId}`);
+    user = await getchef.json();
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Chef id ${id} non trovato`); // Bonus 1
+  }
+  if (user.message) {
+    throw new Error(user.message);
+  }
+
+  return dayjs(user.birthDate).format("DD/MM/YYYY"); // Bonus 2
+}
+
+(async () => {
+  try {
+    const birthDate = await getChefBirthDate(2);
+    console.log("Data di nascita dello chef:", birthDate);
+  } catch (error) {
+    console.error("Errore:", error.message);
+  }
+  console.log("Programma eseguito");
+})();
